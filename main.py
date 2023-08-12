@@ -2,7 +2,16 @@ import os
 import _thread
 from datetime import datetime
 from pygame import mixer
-import cv2.cv2
+import busio
+import digitalio
+import board
+import adafruit_mcp3xxx.mcp3008 as MCP
+from adafruit_mcp3xxx.analog_in import AnalogIn
+import RPi.GPIO as GPIO
+
+import time
+
+import gui
 
 # GLOBALS
 MODES = ["default", "bluetooth", "alarm"]
@@ -17,14 +26,18 @@ IMAGE = None
 def update_io():
     global BUTTON
     global POTTY
-    choice = str(input("\nBUTTON?/POTTY?: "))
-    if choice == "t":
-        BUTTON = True
-    elif choice == "f":
-        BUTTON = False
-    elif choice.startswith("p"):
-        POTTY = float(choice[1::])
-    print("Button: " + str(BUTTON) + ", Potty: " + str(POTTY))
+
+    # create the spi bus
+    spi = busio.SPI(clock=board.SCK, MISO=board.MISO, MOSI=board.MOSI)
+    # create the cs (chip select)
+    cs = digitalio.DigitalInOut(board.D5)
+    # create the mcp object
+    mcp = MCP.MCP3008(spi, cs)
+    # create an analog input channel on pin 0
+    chan = AnalogIn(mcp, MCP.P0)
+
+    POTTY = (chan.value/65472)
+    BUTTON = True if GPIO.input(25) == 1 else False
 
 
 # TODO: play the portal radio audio file on repeat (just needs testing and a proper path...) (also, please use the
@@ -35,7 +48,7 @@ def play_radio():
     global BUTTON
     global CLOSE_REQUEST
     # radio code goes here
-    path = "C:\\Users\\" + os.getlogin() + "\\Music\\portal-radio.mp3"
+    path = "/home/glados/Music/portal-radio.mp3"
     print("Radio Thread Running")
     mixer.init()
     mixer.music.load(path)
@@ -93,7 +106,7 @@ def alarm():
         now = datetime.now()
 
     # 3.: ring... ring...
-    path = "C:\\Users\\" + os.getlogin() + "\\Music\\portal-radio.mp3"
+    path = "/home/glados/Music/portal-radio.mp3"
     print("Alarm Ringing!")
     mixer.init()
     mixer.music.load(path)
@@ -107,13 +120,14 @@ def alarm():
 
 
 def initGui():
-    global IMAGE
-    IMAGE = cv2.imread("C://", cv2.IMREAD_ANYCOLOR)
-    cv2.imshow("Portal Radio", IMAGE)
+    print("Gui initialized")
 
 
 def update_gui(mode, potty):
     global IMAGE
+    global POTTY
+    global BUTTON
+    print ("POTTY: "+str(POTTY)+ ", BUTTON: "+str(BUTTON))
 
 
 def main():
@@ -124,16 +138,18 @@ def main():
     global CLOSE_REQUEST
     current = 0
     previous = BUTTON
-    initGui()
+    GPIO.setwarnings(False) # Ignore warning for now
+    GPIO.setmode(GPIO.BCM) # Use physical pin numbering
+    GPIO.setup(25, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # Set pin 10 to be an input pin and set initial value to be pulled low (off)
+    # initGui()
+    gui.initGui(1200,800)
 
     while True:
         update_io()
         if not previous and BUTTON and POTTY < 0.02:
             # do GUI stuff
-            if cv2.waitKey(0):
-                cv2.destroyAllWindows()
-                exit(0)
-            update_gui(MODES[current], POTTY)
+            # update_gui(MODES[current], POTTY)
+            gui.handleGui(POTTY, MODES[current], SUBTASK)
             # do mode stuff
             if SUBTASK is not None:
                 print("SUBTASK ALREDY RUNNING (close request sent)")
