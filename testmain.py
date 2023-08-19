@@ -72,17 +72,13 @@ def alarm():
     print("Hours...")
     while not BUTTON:  # Annahme: Potty kann zwischen 0 und 1 sein          0,375   ,   0,5833
         hour = int(POTTY / (1.0 / 24.0))
-        if CLOSE_REQUEST:
-            SUBTASK = None
-            return
+        STATUS = "{:02d}h:00m".format(hour)
     while BUTTON:
         continue
     print("Minutes")
     while not BUTTON:
         minute = int((POTTY / (1.0 / 12.0)) * 5)
-        if CLOSE_REQUEST:
-            SUBTASK = None
-            return
+        STATUS = "{:02d}h:{:02d}m".format(hour, minute)
     while BUTTON:
         continue
     print("Alarm set to: {" + str(hour) + ", " + str(minute) + "}")
@@ -91,13 +87,15 @@ def alarm():
     now = datetime.now()
     while not CLOSE_REQUEST and (now.hour != hour or now.minute != minute):
         now = datetime.now()
+    if CLOSE_REQUEST:
+        SUBTASK = None
+        return
 
     # 3.: ring... ring...
     path = "C:\\Users\\Admin\\Music\\Vienna-Calling_Nightcore.mp3"
     print("Alarm Ringing!")
     mixer.init()
     mixer.music.load(path)
-    # mixer.music.set_volume(2) # doesn't work
     #call(["amixer", "-D", "pulse", "sset", "Master", "100%"])  # TODO: try on linux
     while not CLOSE_REQUEST:
         mixer.music.play()
@@ -142,7 +140,7 @@ def main():
                     BUTTON = False          # update BUTTON on PC
 
         gui.handleGui(POTTY*100, MODES[current], STATUS)
-        if not previous and BUTTON and POTTY < 0.02:
+        if not previous and BUTTON:
             # do mode stuff
             if SUBTASK is not None:
                 print("SUBTASK ALREADY RUNNING (close request sent)")
