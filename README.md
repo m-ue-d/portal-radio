@@ -18,7 +18,7 @@ Also, i wanted the radio to:
 
 As you can see, this thing is not your average Portal Radio Prop, and it took about 3 months of work to finish. So let's get to where it is now and talk about what you should keep in mind if you want to replicate my version of this thing:
 
-1. Use a KY-040 instead of the button+potentiometer+adc!
+1. Use something like a KY-040 instead of the button+potentiometer+adc combination i used!
 2. Finish the electronics before printing the case
 3. Find a fitting method to power the prop (i soldered a fitting accumulator to do the job)
 
