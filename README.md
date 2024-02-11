@@ -1,5 +1,5 @@
 # About the project:
-Hey Fellas
+Hey Visitors
 
 It was somewhere between spring and summer 2023 when i decided to build the radio from the game [Portal](https://store.steampowered.com/app/400/Portal/)!
 I did this to improve my understanding of IOT devices, do something with my RPI and learn a bit about electronics. 
