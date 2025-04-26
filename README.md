@@ -11,7 +11,7 @@ Then, i 3D printed the case using [this](https://www.myminifactory.com/object/3d
 
 The tricky part was the assembly, as i decided to use a button and a standard potentiometer paired with a MCP3008 ADC to read user input (Nowadays, i would just use a rotary encoder and have a way better product in the end). 
 Also, i wanted the radio to:
-- Play the default upbeat still alive from the game
+- Play the default upbeat song "still alive" from the game
 - Be usable as a bluetooth speaker
 - be able to run without a power cable
 - be able to run the game portal itself (at least for a few minutes because of the heat thats produced)
